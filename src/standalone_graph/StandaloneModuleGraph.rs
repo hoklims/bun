@@ -860,8 +860,12 @@ fn module_dest_path(output_file: &OutputFile) -> std::borrow::Cow<'_, [u8]> {
 /// Server-side JS modules are stored in the width JSC will load them in
 /// (Latin-1 or UTF-16) so the runtime can wrap the mmapped section bytes in a
 /// zero-copy external string instead of transcoding the whole module into a
-/// 16-bit heap copy at startup. Client chunks and non-JS files are served as
-/// raw bytes (assets, `Bun.embeddedFiles`) and must stay verbatim UTF-8.
+/// 16-bit heap copy at startup. The printer escapes non-ASCII in server JS,
+/// but `--banner`/`--footer`/hashbang text is concatenated verbatim as UTF-8.
+/// Client chunks and non-JS files are served as raw bytes (assets,
+/// `Bun.embeddedFiles`) and must stay verbatim UTF-8. Bytecode generation in
+/// `generateChunksInParallel.rs` mirrors this conversion; the two must agree
+/// or the SourceCodeKey won't match at runtime.
 fn stores_transcoded_contents(output_file: &OutputFile) -> bool {
     matches!(
         output_file.loader,
@@ -910,10 +914,8 @@ pub(crate) fn to_bytes(
                 if stores_transcoded_contents(output_file)
                     && strings::first_non_ascii(bytes).is_some()
                 {
-                    // Worst case for the transcoded form: UTF-16 doubles every
-                    // ASCII byte, plus 1 byte of alignment padding and the NUL.
-                    // `move_to_slice` is truncated to `len`, so over-counting
-                    // only costs transient capacity.
+                    // Transcoded worst case: UTF-16 doubles every ASCII byte,
+                    // plus 1 byte of alignment padding and the NUL.
                     string_builder.cap += bytes.len() * 2 + 2;
                 } else {
                     string_builder.count_z(bytes);
