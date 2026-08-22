@@ -778,7 +778,10 @@ impl JSGlobalObject {
         }
         let mut buf: Vec<u8> = Vec::with_capacity(2048);
         use core::fmt::Write;
-        write!(WriteVec(&mut buf), "{}", args).map_err(|_| JsError::Thrown)?;
+        let _ = write!(WriteVec(&mut buf), "{}", args);
+        if self.has_exception() {
+            return Err(JsError::Thrown);
+        }
         let str = ZigString::from_utf8(&buf);
         Ok(str.to_dom_exception_instance(self, code))
     }
