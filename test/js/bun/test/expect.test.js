@@ -761,6 +761,19 @@ describe("expect()", () => {
       });
       expect(0).toHitThrowingProxy();
       expect(hintErr).toBe(trapErr);
+
+      // An invalid matcher return (no `pass`) is console-formatted into the error message;
+      // a throwing inspect.custom on that value must propagate, not be masked.
+      expect.extend({
+        toReturnThrowingInspect() {
+          return {
+            [Symbol.for("nodejs.util.inspect.custom")]() {
+              throw trapErr;
+            },
+          };
+        },
+      });
+      expect(caught(() => expect(0).toReturnThrowingInspect())).toBe(trapErr);
     });
   }
 
