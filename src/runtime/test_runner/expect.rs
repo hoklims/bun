@@ -2914,8 +2914,7 @@ impl ExpectMatcherUtils {
         } else {
             bun_core::pretty_fmt!("<d>(<r><green>expected<r><d>)<r>", false)
         };
-        // DiffFormatter::fmt may return Err when pretty-printing user JS throws; use
-        // write! into a Vec (format! panics on Display errors) and propagate the throw.
+        // format! panics when a Display impl returns Err, which DiffFormatter does when user JS throws.
         let mut buf: Vec<u8> = Vec::with_capacity(256);
         let _ = core::fmt::Write::write_fmt(
             &mut bun_core::fmt::VecWriter(&mut buf),

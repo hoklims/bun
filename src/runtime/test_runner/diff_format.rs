@@ -44,8 +44,7 @@ impl<'a> fmt::Display for DiffFormatter<'a> {
                 flush: false,
                 quote_strings: true,
             };
-            // JestPrettyFormat can invoke user JS (proxy traps, getters) that throws. Bail so the
-            // caller propagates the pending JS exception instead of re-entering JSC with one live.
+            // Err means a JS exception is pending; do not re-enter JSC with it live.
             if JestPrettyFormat::format(
                 MessageLevel::Debug,
                 global_this,

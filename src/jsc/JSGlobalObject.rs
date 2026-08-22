@@ -744,8 +744,7 @@ impl JSGlobalObject {
         let mut buf: Vec<u8> = Vec::with_capacity(2048);
         use core::fmt::Write;
         let _ = write!(WriteVec(&mut buf), "{}", args);
-        // Formatting may invoke user JS (proxy traps, Symbol.toPrimitive, getters) that throws.
-        // Propagate that exception rather than masking it with a second error built on top.
+        // A Display impl can run user JS that throws; propagate that instead of a second error.
         if self.has_exception() {
             return JSValue::ZERO;
         }
