@@ -745,6 +745,7 @@ describe("expect()", () => {
       expect(caught(() => expect(thrArr()).toStrictEqual({ a: 1 }))).toBe(trapErr);
       expect(caught(() => expect({ a: 1 }).toStrictEqual(thrArr()))).toBe(trapErr);
       expect(caught(() => expect(thrArr()).toEqual({ a: 1 }))).toBe(trapErr);
+      expect(caught(() => expect(thrArr()).toMatchObject({ a: 1 }))).toBe(trapErr);
 
       // this.utils.matcherHint goes through the same DiffFormatter with user-supplied
       // received/expected; it should propagate the trap throw rather than panic.

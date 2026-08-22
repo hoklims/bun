@@ -958,13 +958,16 @@ bool Bun__deepEquals(JSC::JSGlobalObject* globalObject, JSValue v1, JSValue v2, 
         const bool hasProxy = c1->type() == ProxyObjectType || c2->type() == ProxyObjectType;
         if constexpr (!skipPrototypeIdentity) {
             if (hasProxy) {
-                // calculatedClassName() is "ProxyObject" for every Proxy; compare the observable prototype.
-                JSValue p1 = o1->getPrototype(globalObject);
-                RETURN_IF_EXCEPTION(scope, false);
-                JSValue p2 = o2->getPrototype(globalObject);
-                RETURN_IF_EXCEPTION(scope, false);
-                if (p1 != p2) {
-                    return false;
+                // calculatedClassName() is "ProxyObject" for every Proxy; compare the observable
+                // prototype instead. checkPrototypes already did exactly that above.
+                if constexpr (!checkPrototypes) {
+                    JSValue p1 = o1->getPrototype(globalObject);
+                    RETURN_IF_EXCEPTION(scope, false);
+                    JSValue p2 = o2->getPrototype(globalObject);
+                    RETURN_IF_EXCEPTION(scope, false);
+                    if (p1 != p2) {
+                        return false;
+                    }
                 }
             } else if (!equal(JSObject::calculatedClassName(o1), JSObject::calculatedClassName(o2))) {
                 return false;
