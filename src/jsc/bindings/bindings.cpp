@@ -2117,7 +2117,11 @@ bool Bun__deepMatch(
     // similar to what is done in deepEquals (canPerformFastPropertyEnumerationForIterationBun)
 
     // arrays should match exactly
-    if (isArray(globalObject, objValue) && isArray(globalObject, subsetValue)) {
+    bool objIsArray = isArray(globalObject, objValue);
+    RETURN_IF_EXCEPTION(throwScope, false);
+    bool subsetIsArray = isArray(globalObject, subsetValue);
+    RETURN_IF_EXCEPTION(throwScope, false);
+    if (objIsArray && subsetIsArray) {
         if (obj->getArrayLength() != subsetObj->getArrayLength()) {
             return false;
         }
